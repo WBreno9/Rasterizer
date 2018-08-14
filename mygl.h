@@ -58,15 +58,34 @@ void ClearBuffer(glm::vec4 c) {
         }
 }
 
-void DrawLine(PixelCoord p0, PixelCoord p1, glm::vec4 c0, glm::vec4 c1) {
+void DrawLine(glm::vec3 v0, glm::vec3 v1, glm::vec4 c0, glm::vec4 c1) {
+
+    //Convert from NDC to screen coordinates
+    //NDC has (0.0, 0.0) as the center point
+    //(-1.0, -1.0) lower left conner
+    //(1.0, 1.0) higher right conner
+    PixelCoord p0 = convertCoord(v0);
+    PixelCoord p1 = convertCoord(v1);
+
     int dx = p1.x - p0.x;
     int dy = p1.y - p0.y;
 
-    int dxtmp = dx;
+    //If the slope is higher than 45 degrees (dy > dx),
+    //swap x with y
+    bool invert = false;
+    if(abs(dy) > abs(dx)) {
+        std::swap(dx, dy);
+        std::swap(p0.x, p0.y);
+        std::swap(p1.x, p1.y);
+        invert = true;
+    }
 
+    //Linear color interpolation
     bool interpolate = false;
     glm::vec4 incC;
     if(c0 != c1) {
+        //If the x coordinate is mirroed (it is on the oposite quadrant)
+        //also mirror the interpolation
         if (dx > 0)
             incC = (c1 - c0)/(float)dx;
         else
@@ -76,31 +95,28 @@ void DrawLine(PixelCoord p0, PixelCoord p1, glm::vec4 c0, glm::vec4 c1) {
     }
 
     int incX = 1, incY = 1;
+    //Mirror the y coordinate and decrement instead of increment
     if(dy < 0) { 
         dy = -dy; 
         incY = -1; 
     } 
+
+    //Mirror the x coordinate and decrement instead of increment
     if(dx < 0) { 
         dx = -dx; 
         incX = -1; 
     } 
 
-
-    bool invert = false;
-    if(abs(dy) > abs(dx)) {
-        std::swap(dx, dy);
-        std::swap(p0.x, p0.y);
-        std::swap(p1.x, p1.y);
-        invert = true;
-    }
-
-
+    //Bresenham algorithm
     int incE  = 2 * dy;
     int incNE = 2 * (dy - dx);
     int d = 2*dy - dx;
 
+    //If the x coordinate has been mirroed, adjust the loop accordingly by
+    //inverting the comparison
     int currX = p0.x, currY = p0.y;
     while(incX*currX <= incX*p1.x) {
+        //If x was been swaped with y, swap then back
         if(invert)
             PutPixel({(unsigned int)currY, (unsigned int)currX}, convertColor(c0));
         else 
@@ -114,6 +130,7 @@ void DrawLine(PixelCoord p0, PixelCoord p1, glm::vec4 c0, glm::vec4 c1) {
             currX += incX;
         }
 
+        //Dont interpolate if it isnt necessary
         if(interpolate) 
             c0 += incC;
     }
@@ -125,17 +142,22 @@ struct Vertex {
     glm::vec4 color;
 };
 
-/*
 void DrawTriangle(Vertex v0, Vertex v1, Vertex v2) {
-    PixelCoord p0 = convertCoord(v0);
-    PixelCoord p1 = convertCoord(v1);
-    PixelCoord p2 = convertCoord(v2);
-
     DrawLine(v0.pos, v1.pos, v0.color, v1.color);
     DrawLine(v1.pos, v2.pos, v1.color, v2.color);
     DrawLine(v2.pos, v0.pos, v2.color, v0.color);
 }
-*/
+
+//Simpler function for drawing horizontal lines.
+//Used for fill triangles
+void DrawHorizontalLine(PixelCoord p0, PixelCoord p1, glm::vec4 c0, glm::vec4 c1) {
+    glm::vec4 incC = (c1 - c0) / ((float)p1.x - p0.x);
+
+    for (unsigned int i = p0.x; i < p1.x; i++) {
+        PutPixel({i, p0.y}, convertColor(c0));
+        c0 += incC;
+    }
+}
 
 void DrawBottomFlatTriangle(Vertex v0, Vertex v1, Vertex v2) {
     if (v1.pos.x > v2.pos.x)
@@ -159,8 +181,8 @@ void DrawBottomFlatTriangle(Vertex v0, Vertex v1, Vertex v2) {
     glm::vec4 incC1 = (v2.color - v0.color) / dy;
 
     for (unsigned int scanLineY = p0.y; scanLineY <= p1.y; scanLineY++) {
-        DrawLine({(unsigned int) currX1, scanLineY}, 
-                 {(unsigned int) currX2, scanLineY}, c0, c1);
+        DrawHorizontalLine({(unsigned int) currX1, scanLineY}, 
+                           {(unsigned int) currX2, scanLineY}, c0, c1);
         currX1 += invSlope1;
         currX2 += invSlope2;
 
@@ -191,8 +213,8 @@ void DrawTopFlatTriangle(Vertex v0, Vertex v1, Vertex v2) {
     glm::vec4 incC1 = (v1.color - v2.color) / dy;
 
     for (unsigned int scanLineY = p2.y; scanLineY > p0.y; scanLineY--) {
-        DrawLine({(unsigned int) currX1, scanLineY}, 
-                 {(unsigned int) currX2, scanLineY}, c0, c1);
+        DrawHorizontalLine({(unsigned int) currX1, scanLineY}, 
+                           {(unsigned int) currX2, scanLineY}, c0, c1);
         currX1 -= invSlope1;
         currX2 -= invSlope2;
 

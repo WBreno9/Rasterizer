@@ -7,7 +7,7 @@ void MyGlDraw(void)
 	// Chame aqui as funções do mygl.h
 	//*************************************************************************
     
-    //ClearBuffer(PixelColor(255, 255, 255, 255));
+    ClearBuffer(glm::vec4(1.0));
 
     Vertex v0 = {}, v1 = {}, v2 = {};
 
@@ -17,7 +17,7 @@ void MyGlDraw(void)
     v1.pos   = glm::vec3(-0.8, -0.8, 0.0);
     v1.color = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
-    v2.pos   = glm::vec3(0.0, -0.5, 0.0);
+    v2.pos   = glm::vec3(0.8, -0.5, 0.0);
     v2.color = glm::vec4(0.0, 1.0, 0.0, 1.0);
 
     DrawTriangleFill(v0, v1, v2);
@@ -34,22 +34,8 @@ void MyGlDraw(void)
     v2.pos   = glm::vec3(-0.65, -0.5, 0.0);
     v2.color = glm::vec4(0.0, 1.0, 0.0, 1.0);
 
-    DrawBottomFlatTriangle(v0, v1, v2);
+    DrawTriangle(v0, v1, v2);
     */
-
-    /*
-    DrawLine(
-            convertCoord({0.0, 0.0, 0.0}), 
-            convertCoord({1.0, 0.3, 0.0}), 
-            glm::vec4(1.0, 0.0, 0.0, 1.0),
-            glm::vec4(0.0, 0.0, 1.0, 1.0));
-
-    DrawLine(
-            convertCoord({1.0, 0.6, 0.0}), 
-            convertCoord({0.0, 0.3, 0.0}), 
-            glm::vec4(1.0, 0.0, 0.0, 1.0),
-            glm::vec4(0.0, 0.0, 1.0, 1.0));
-            */
 
 }
 
