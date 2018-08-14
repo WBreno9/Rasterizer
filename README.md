@@ -5,7 +5,7 @@ Um simples rasterizador de segmentos de reta e triângulos.
 # Rasterização de segmento de retas (Algoritmo de Brasenham)
 ![print4.png](results/print4.png)
 
- O algoritmo adaptado para funcionar com os 8 octantes e com 
+ Algoritmo adaptado para funcionar com os 8 octantes e com 
  interpolação linear das cores. Os 8 octantes foram feitos espelhando
  as coordenadas e trocando as coordenadas caso a inclinação da reta for maior
  que 45°.
