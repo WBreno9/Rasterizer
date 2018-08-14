@@ -137,7 +137,7 @@ void DrawLine(glm::vec3 v0, glm::vec3 v1, glm::vec4 c0, glm::vec4 c1) {
 }
 
 struct Vertex {
-    glm::vec2 texcoord;
+    //glm::vec2 texcoord;
     glm::vec3 pos;
     glm::vec4 color;
 };
@@ -163,6 +163,7 @@ void DrawBottomFlatTriangle(Vertex v0, Vertex v1, Vertex v2) {
     if (v1.pos.x > v2.pos.x)
         std::swap(v1.pos, v2.pos);
 
+    //Convert from NDC to screen coordinates
     PixelCoord p0 = convertCoord(v0.pos);
     PixelCoord p1 = convertCoord(v1.pos);
     PixelCoord p2 = convertCoord(v2.pos);
@@ -176,13 +177,20 @@ void DrawBottomFlatTriangle(Vertex v0, Vertex v1, Vertex v2) {
     glm::vec4 c0 = v0.color;
     glm::vec4 c1 = v0.color;
 
+    //Linear color interpolation from v0 (topmost vertex)
+    //to v1 (leftmost vertex) and to v2(rightmost vertex)
     float dy = p1.y - p0.y;
     glm::vec4 incC0 = (v1.color - v0.color) / dy;
     glm::vec4 incC1 = (v2.color - v0.color) / dy;
 
+    //Draw a scanline between two endpoints (currX1 and currX2)
+    //from top to bottom
     for (unsigned int scanLineY = p0.y; scanLineY <= p1.y; scanLineY++) {
         DrawHorizontalLine({(unsigned int) currX1, scanLineY}, 
                            {(unsigned int) currX2, scanLineY}, c0, c1);
+
+        //Increment the endpoint by their respective lines slopes
+        //making the scanline bigger, thus creating a bottom flat triangle
         currX1 += invSlope1;
         currX2 += invSlope2;
 
@@ -195,6 +203,7 @@ void DrawTopFlatTriangle(Vertex v0, Vertex v1, Vertex v2) {
     if (v0.pos.x > v1.pos.x)
         std::swap(v0.pos, v1.pos);
 
+    //Convert from NDC to screen coordinates
     PixelCoord p0 = convertCoord(v0.pos);
     PixelCoord p1 = convertCoord(v1.pos);
     PixelCoord p2 = convertCoord(v2.pos);
@@ -208,13 +217,20 @@ void DrawTopFlatTriangle(Vertex v0, Vertex v1, Vertex v2) {
     glm::vec4 c0 = v2.color;
     glm::vec4 c1 = v2.color;
 
+    //Linear color interpolation from v2 (lowermost vertex)
+    //to v0 (leftmost vertex) and to v1(rightmost vertex)
     float dy = p2.y - p0.y;
     glm::vec4 incC0 = (v0.color - v2.color) / dy;
     glm::vec4 incC1 = (v1.color - v2.color) / dy;
 
+    //Draw a scanline between two endpoints (currX1 and currX2)
+    //from top to bottom
     for (unsigned int scanLineY = p2.y; scanLineY > p0.y; scanLineY--) {
         DrawHorizontalLine({(unsigned int) currX1, scanLineY}, 
                            {(unsigned int) currX2, scanLineY}, c0, c1);
+
+        //Decrement the endpoint by their respective lines slopes
+        //making the scanline smaller, thus creating a top flat triangle
         currX1 -= invSlope1;
         currX2 -= invSlope2;
 
@@ -224,6 +240,10 @@ void DrawTopFlatTriangle(Vertex v0, Vertex v1, Vertex v2) {
 }
 
 void DrawTriangleFill(Vertex v0, Vertex v1, Vertex v2) {
+    //Sorting the vertices
+    //v0 the topmost
+    //v2 the lowermost
+    //v1 in between
     if (v1.pos.y > v0.pos.y) 
         std::swap(v0.pos, v1.pos);
 
@@ -237,14 +257,18 @@ void DrawTriangleFill(Vertex v0, Vertex v1, Vertex v2) {
     }
 
     if (v1.pos.y == v2.pos.y) {
+        //If it is a bottom flat triangle
         DrawBottomFlatTriangle(v0, v1, v2);
 
     } else if (v0.pos.y == v1.pos.y) {
+        //If it is a top flat triangle
         DrawTopFlatTriangle(v0, v1, v2);
         
     } else {
+        //If is neither, split the triangle in two, a top flat, and a bottom flat
         Vertex v3;
 
+        //Calculate the intersection point
         v3.pos = glm::vec3((v0.pos.x + (v1.pos.y - v0.pos.y) / (v2.pos.y - v0.pos.y) * 
                     (v2.pos.x - v0.pos.x)), v1.pos.y, 0.0f);
 
