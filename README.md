@@ -37,3 +37,5 @@ da parte inferior e sobem até o topo.
 
 ## Junção dos dois triângulos
 ![print1.png](results/print1.png)
+
+A implementação foi feita baseada em: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
