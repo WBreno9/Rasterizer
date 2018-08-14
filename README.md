@@ -1,5 +1,5 @@
 # Rasterizer
-A simple rasterizer
+Um simples rasterizador de segmentos de reta e triângulos.
 
 ---
 # Rasterização de segmento de retas (Algoritmo de Brasenham)
