@@ -22,8 +22,7 @@ Para fazer o preenchimento o triâgulo é divido em dois outros triângulos,
 um com o primeiro vertice acima de dois outros vertices alinhados na vertical (bottom flat) e
 outro com o ultimo vertice abaixo dos outros dois vertices, que também são alinhados na vertical (top flat).
 
----
-# Bottom flat triangle
+## Bottom flat triangle
 ![print3.png](results/print3.png)
 
 O bottom flat triangle é rasterizado com linhas horizontais (scan lines) começando do topo até alcançar os outros
