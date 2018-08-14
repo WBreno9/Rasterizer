@@ -17,7 +17,7 @@ Um simples rasterizador de segmentos de reta e triângulos.
 Triângulo construído apenas por segmentos de reta.
 
 ---
-# Triangulo preenchido
+# Triângulo preenchido
 Para fazer o preenchimento o triâgulo é divido em dois outros triângulos,
 um com o primeiro vertice acima de dois outros vertices alinhados na vertical (bottom flat) e
 outro com o ultimo vertice abaixo dos outros dois vertices, que também são alinhados na vertical (top flat).
