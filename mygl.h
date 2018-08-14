@@ -28,11 +28,13 @@ struct PixelCoord {
     PixelCoord(unsigned int x, unsigned int y) : x(x), y(y) {}
 };
 
+//Function to converto from NDC to screen coordinates
 inline PixelCoord convertCoord(glm::vec3 p) {
     return {static_cast<unsigned int>(p.x*((IMAGE_WIDTH-1)/2.0f)+((IMAGE_WIDTH-1)/2.0f)), 
             static_cast<unsigned int>(p.y*-1.0f*((IMAGE_HEIGHT-1)/2.0f)+((IMAGE_HEIGHT-1)/2.0f))};
 }
 
+//Function to convert from float RGBA to unsigned char RGBA
 inline PixelColor convertColor(glm::vec4 c) {
     return {static_cast<unsigned char>(c.r * 255),
             static_cast<unsigned char>(c.g * 255),
@@ -40,6 +42,7 @@ inline PixelColor convertColor(glm::vec4 c) {
             static_cast<unsigned char>(c.a * 255)};
 }
 
+//Write pixel to buffer
 void PutPixel(PixelCoord p, PixelColor c) {
     if(p.x >= IMAGE_WIDTH || p.y >= IMAGE_HEIGHT) 
         throw std::length_error("Frame buffer acess out of bounds");
@@ -51,6 +54,7 @@ void PutPixel(PixelCoord p, PixelColor c) {
     FBptr[index + 3] = c.b;
 }
 
+//Fill buffer with a solid color
 void ClearBuffer(glm::vec4 c) {
     for(unsigned int i = 0; i < IMAGE_WIDTH; i++)
         for(unsigned int j = 0; j < IMAGE_HEIGHT; j++) {
@@ -115,7 +119,7 @@ void DrawLine(glm::vec3 v0, glm::vec3 v1, glm::vec4 c0, glm::vec4 c1) {
     //If the x coordinate has been mirroed, adjust the loop accordingly by
     //inverting the comparison
     int currX = p0.x, currY = p0.y;
-    while(incX*currX <= incX*p1.x) {
+    while(incX*currX <= (int)(incX*p1.x)) {
         //If x was been swaped with y, swap then back
         if(invert)
             PutPixel({(unsigned int)currY, (unsigned int)currX}, convertColor(c0));
@@ -224,13 +228,13 @@ void DrawTopFlatTriangle(Vertex v0, Vertex v1, Vertex v2) {
     glm::vec4 incC1 = (v1.color - v2.color) / dy;
 
     //Draw a scanline between two endpoints (currX1 and currX2)
-    //from top to bottom
+    //from bottom to top
     for (unsigned int scanLineY = p2.y; scanLineY > p0.y; scanLineY--) {
         DrawHorizontalLine({(unsigned int) currX1, scanLineY}, 
                            {(unsigned int) currX2, scanLineY}, c0, c1);
 
         //Decrement the endpoint by their respective lines slopes
-        //making the scanline smaller, thus creating a top flat triangle
+        //making the scanline bigger, thus creating a top flat triangle
         currX1 -= invSlope1;
         currX2 -= invSlope2;
 
